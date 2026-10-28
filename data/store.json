@@ -1,0 +1,19 @@
+{
+  "employees": [],
+  "payrollRuns": [],
+  "settings": {
+    "companyName": "Nexis Technologies India Pvt Ltd",
+    "companyAddress": "Prestige Tech Park, Outer Ring Road, Bengaluru, Karnataka 560103",
+    "taxRegistrationNumber": "GSTIN29AAACN8123Q1Z8",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "defaultWorkingDays": 26,
+    "defaultHraPercentage": 20,
+    "defaultDaPercentage": 10,
+    "defaultPfPercentage": 12,
+    "defaultTaxPercentage": 10,
+    "uipathIntegrationMode": "local_engine",
+    "orchestratorUrl": "https://cloud.uipath.com/nexis-technologies/DefaultTenant/orchestrator_",
+    "orchestratorTenant": "DefaultTenant"
+  }
+}

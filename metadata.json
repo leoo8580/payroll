@@ -1,0 +1,6 @@
+{
+  "name": "PayFlow",
+  "description": "Automated Excel-based payroll management and RPA preparation system with employee administration, spreadsheet validation, calculation engine, and report exports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
