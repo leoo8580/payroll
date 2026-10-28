@@ -1,6 +1,6 @@
 export const UIPATH_PROJECT_JSON = `{
   "name": "PayFlow_Automated_Payroll_Preparation",
-  "description": "Automated Excel-Based Payroll Preparation System using UiPath Studio and Excel Activities. Final Year College Project Demo.",
+  "description": "Automated Excel-Based Payroll Preparation System using UiPath Studio and Excel Activities.",
   "main": "Main.xaml",
   "dependencies": {
     "UiPath.Excel.Activities": "[2.23.4]",
@@ -284,10 +284,10 @@ export const UIPATH_MAIN_XAML = `<?xml version="1.0" encoding="utf-8"?>
 
 export const UIPATH_DEMO_GUIDE = {
   projectTitle: "Automated Excel-Based Payroll Preparation Using UiPath and Excel",
-  candidateRole: "Lead Full-Stack Developer & UiPath RPA Engineer",
-  collegePresentationFlow: [
+  systemRole: "Enterprise HR Automation & RPA Processing Pipeline",
+  enterpriseAutomationFramework: [
     {
-      phase: "1. Problem Statement & Motivation",
+      phase: "1. Automated Ingestion & Data Validation",
       summary: "Manual payroll preparation in organizations takes hours of error-prone copy-pasting between biometric/attendance spreadsheets and salary formulas. Inaccurate proration, statutory deduction slip-ups, or unverified formula edits cause severe compliance and employee satisfaction issues.",
       talkingPoints: [
         "Biometric logs contain partial attendance, leave discrepancies, and formatting anomalies.",
@@ -305,20 +305,20 @@ export const UIPATH_DEMO_GUIDE = {
       ]
     },
     {
-      phase: "3. Live Demonstration Sequence",
-      summary: "Recommended 4-step walk-through for evaluators and professors:",
+      phase: "3. Automated Processing Sequence",
+      summary: "Standard 4-step enterprise payroll execution pipeline:",
       talkingPoints: [
-        "Step 1: Open Employee Management, show 16 realistic employee profiles across Engineering, HR, Finance, and Operations with configurable salary structures.",
-        "Step 2: Navigate to Payroll Processing. Select month (October 2026), set 26 working days. Download the template or load the provided test attendance file.",
-        "Step 3: Show the validation step! Highlight how row 4 (missing ID) and row 7 (days worked > working days) are caught automatically with understandable feedback before any calculation is made.",
-        "Step 4: Trigger the UiPath RPA Execution. Observe the live sequence of Excel activities executing in real-time, generate the final Payroll_Report.xlsx, download the file, and verify the formulas."
+        "Step 1: Open Employee Management to manage employee profiles across Engineering, HR, Finance, and Operations with configurable salary structures.",
+        "Step 2: Navigate to Payroll Processing. Select month, set standard working days. Download the template or load attendance data.",
+        "Step 3: Automated validation audit! Catch missing IDs, zero-day anomalies, or days worked exceeding total working days before calculation.",
+        "Step 4: Trigger the UiPath RPA Execution. Observe the live sequence of Excel activities executing in real-time, generate the final Payroll_Report.xlsx, and download the multi-sheet register."
       ]
     },
     {
       phase: "4. UiPath Execution Methods",
-      summary: "PayFlow supports both Direct Backend Execution (for zero-setup browser demo) and Real UiPath Studio / CLI Execution:",
+      summary: "PayFlow supports both Direct Backend Execution and Real UiPath Studio / CLI Execution:",
       talkingPoints: [
-        "Option A (Zero-Setup Demo): PayFlow backend executes the exact UiPath activity pipeline internally and produces authentic Excel workbooks.",
+        "Option A (Zero-Setup Instant Execution): PayFlow backend executes the exact UiPath activity pipeline internally and produces authentic Excel workbooks.",
         "Option B (UiPath Assistant / Studio): Download Main.xaml and project.json from the RPA Center, open in UiPath Studio 2024.10, and click 'Run'.",
         "Option C (CLI Trigger): Execute from Windows terminal: UiRobot.exe execute --file PayFlow_Payroll_Automation\\Main.xaml"
       ]

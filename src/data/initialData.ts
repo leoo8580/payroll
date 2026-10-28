@@ -361,7 +361,7 @@ function generateHistoricalRun(
     year,
     periodKey,
     processedAt,
-    processedBy: 'Priya Sharma (HR Admin)',
+    processedBy: 'Payroll Administrator (HR Ops)',
     totalEmployees: eligible.length,
     activeEmployees: eligible.length,
     grossPayroll,

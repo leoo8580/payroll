@@ -399,8 +399,8 @@ export function generateEmployeeMasterTemplate(): Uint8Array {
     },
     {
       'Employee ID': 'EMP-1002',
-      'Full Name': 'Priya Patel',
-      'Email': 'priya.patel@company.com',
+      'Full Name': 'Kavita Nair',
+      'Email': 'kavita.nair@company.com',
       'Department': 'Human Resources',
       'Designation': 'HR Specialist',
       'Basic Monthly Salary': 65000,

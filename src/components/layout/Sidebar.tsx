@@ -121,29 +121,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* College Project Badge */}
-      <div className="px-4 py-3 mx-3 mb-2 rounded-lg bg-slate-800/50 border border-slate-800 text-xs">
+      {/* Automation Worker Status Badge */}
+      <div className="px-4 py-3 mx-3 mb-2 rounded-lg bg-slate-800/40 border border-slate-800 text-xs">
         <div className="flex items-center gap-1.5 text-teal-400 font-medium mb-1">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Final Year Project</span>
+          <Cpu className="w-3.5 h-3.5" />
+          <span>RPA Automation Active</span>
         </div>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          UiPath RPA + Excel automated formula proration & reporting system.
+          Excel activity engine connected for automated salary calculations.
         </p>
       </div>
 
       {/* User Profile Card */}
       <div className="p-3 border-t border-slate-800/80 bg-slate-900/60">
         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 transition-colors">
-          <img
-            src="/src/assets/images/avatar_payroll_admin_1793202804927.jpg"
-            alt="Priya Sharma"
-            referrerPolicy="no-referrer"
-            className="w-9 h-9 rounded-full object-cover border border-slate-700"
-          />
+          <div className="w-9 h-9 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-bold text-xs">
+            HR
+          </div>
           <div className="truncate flex-1">
-            <p className="text-xs font-semibold text-white truncate">Priya Sharma</p>
-            <p className="text-[11px] text-slate-400 truncate">Senior HR Administrator</p>
+            <p className="text-xs font-semibold text-white truncate">Payroll Administrator</p>
+            <p className="text-[11px] text-slate-400 truncate">HR Operations Manager</p>
           </div>
         </div>
       </div>

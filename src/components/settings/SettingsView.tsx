@@ -217,14 +217,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Academic Demo & Statutory Disclaimer */}
+        {/* Statutory Compliance & Formula Reference */}
         <div className="p-4 rounded-xl bg-slate-100/80 border border-slate-200 text-xs text-slate-600 space-y-1.5">
           <div className="flex items-center gap-1.5 font-bold text-slate-900">
-            <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>Academic Demonstration & Statutory Disclaimer</span>
+            <ShieldAlert className="w-4 h-4 text-teal-600 shrink-0" />
+            <span>Statutory Compliance & Automated Formula Reference</span>
           </div>
           <p className="leading-relaxed">
-            The formulas implemented in this application (Basic proration, HRA 20%, DA 10%, PF 12%, Tax TDS 10%) represent academic-demo assumptions for the final-year engineering project "Automated Excel-Based Payroll Preparation Using UiPath and Excel". Actual organizational payroll must be reconciled with local labor statutory acts, Employee Provident Fund Organisation (EPFO) ceilings, and Income Tax slabs.
+            Formulas configured in PayFlow automate monthly payroll proration: Basic Salary Payable = (Basic Salary × Days Worked) / Working Days, HRA (20%), DA (10%), Gross Salary summation, PF (12%), and Tax TDS (10%). Update percentages above to reflect your organization's compensation policy and jurisdiction.
           </p>
         </div>
 

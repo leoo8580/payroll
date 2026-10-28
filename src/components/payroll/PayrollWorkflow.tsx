@@ -288,7 +288,7 @@ export const PayrollWorkflow: React.FC<PayrollWorkflowProps> = ({
         year: selectedYear,
         periodKey,
         processedAt: new Date().toISOString(),
-        processedBy: 'Priya Sharma (Senior HR Admin)',
+        processedBy: 'Payroll Administrator (HR Ops)',
         totalEmployees: employees.length,
         activeEmployees: records.length,
         grossPayroll,

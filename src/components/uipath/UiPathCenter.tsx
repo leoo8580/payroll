@@ -5,23 +5,25 @@ import {
   Code2, 
   Layers, 
   CheckCircle2, 
-  ExternalLink, 
   Terminal, 
-  BookOpen, 
   FileCode, 
   Copy, 
   Check,
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  Database
+  Play,
+  RefreshCw,
+  Zap,
+  Activity
 } from 'lucide-react';
-import { UIPATH_MAIN_XAML, UIPATH_PROJECT_JSON, UIPATH_DEMO_GUIDE } from '../../data/uipath/uipathWorkflow';
-import { downloadFile } from '../../services/excelService';
+import { UIPATH_MAIN_XAML, UIPATH_PROJECT_JSON } from '../../data/uipath/uipathWorkflow';
+import { api } from '../../services/api';
 
 export const UiPathCenter: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'architecture' | 'xaml' | 'projectJson' | 'viva'>('architecture');
+  const [activeSubTab, setActiveSubTab] = useState<'architecture' | 'cli' | 'xaml' | 'projectJson'>('architecture');
   const [copied, setCopied] = useState<string | null>(null);
+
+  // Diagnostic runner state
+  const [isRunningTest, setIsRunningTest] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -53,6 +55,25 @@ export const UiPathCenter: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleRunDiagnostic = async () => {
+    setIsRunningTest(true);
+    setTestResult(null);
+    try {
+      const details = await api.triggerUiPathRPA({
+        periodKey: '2026-10',
+        month: 'October',
+        year: 2026,
+        recordsCount: 15,
+        workingDays: 26,
+      });
+      setTestResult(details);
+    } catch (err: any) {
+      alert(`Diagnostic test failed: ${err.message}`);
+    } finally {
+      setIsRunningTest(false);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-12 max-w-7xl mx-auto">
       {/* Header Banner */}
@@ -65,14 +86,14 @@ export const UiPathCenter: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-white">
-                  UiPath RPA & Excel Engineering Center
+                  UiPath RPA Automation & Engineering Console
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800">
                   UiPath Studio 2024.10 Compatible
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Complete architecture, XAML workflow definitions, sequence flowcharts, CLI execution instructions, and presentation scripts for college project viva evaluation.
+                Production architecture, XAML workflow definitions, sequence flowcharts, CLI execution instructions, and automated Excel activities.
               </p>
             </div>
           </div>
@@ -106,17 +127,17 @@ export const UiPathCenter: React.FC = () => {
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          System Architecture & Activity Pipeline
+          Automated Pipeline Architecture
         </button>
         <button
-          onClick={() => setActiveSubTab('viva')}
+          onClick={() => setActiveSubTab('cli')}
           className={`pb-3 text-xs font-semibold px-2 transition-colors relative ${
-            activeSubTab === 'viva'
+            activeSubTab === 'cli'
               ? 'text-teal-700 border-b-2 border-teal-600'
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          College Viva & Demo Guide
+          RPA Execution Runner & CLI
         </button>
         <button
           onClick={() => setActiveSubTab('xaml')}
@@ -143,7 +164,6 @@ export const UiPathCenter: React.FC = () => {
       {/* TAB 1: System Architecture */}
       {activeSubTab === 'architecture' && (
         <div className="space-y-6 animate-in fade-in duration-150">
-          {/* Architecture Pipeline Flow */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
             <h3 className="text-sm font-bold text-slate-900 mb-2">End-to-End Enterprise RPA Integration Flow</h3>
             <p className="text-xs text-slate-500 mb-6">
@@ -205,7 +225,7 @@ export const UiPathCenter: React.FC = () => {
             </div>
           </div>
 
-          {/* Detailed Activities Breakdown Table */}
+          {/* Activities Breakdown */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900">
@@ -269,39 +289,71 @@ export const UiPathCenter: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: College Viva & Demo Guide */}
-      {activeSubTab === 'viva' && (
+      {/* TAB 2: RPA Execution Runner & CLI Controller */}
+      {activeSubTab === 'cli' && (
         <div className="space-y-6 animate-in fade-in duration-150">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-            <div className="flex items-center gap-2 mb-2 text-teal-700">
-              <ShieldCheck className="w-5 h-5" />
-              <h3 className="text-sm font-bold text-slate-900">Final-Year Engineering Project Defense & Viva Script</h3>
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Live RPA Pipeline Diagnostic</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Execute a live end-to-end benchmark run against the backend automation engine to inspect activity durations and throughput.
+              </p>
             </div>
-            <p className="text-xs text-slate-500 mb-6">
-              Structured walkthrough guide for professors, academic evaluators, and external examiners:
-            </p>
 
-            <div className="space-y-6">
-              {UIPATH_DEMO_GUIDE.collegePresentationFlow.map((section, idx) => (
-                <div key={idx} className="p-5 rounded-xl bg-slate-50 border border-slate-200/80">
-                  <h4 className="text-xs font-bold text-slate-900">{section.phase}</h4>
-                  <p className="text-xs text-slate-600 mt-1 mb-3 leading-relaxed">{section.summary}</p>
-                  
-                  <div className="space-y-1.5 pl-4 border-l-2 border-teal-500">
-                    {section.talkingPoints.map((pt, pIdx) => (
-                      <p key={pIdx} className="text-xs text-slate-700 flex items-start gap-1.5">
-                        <span className="text-teal-600 font-bold shrink-0">·</span>
-                        <span>{pt}</span>
-                      </p>
-                    ))}
-                  </div>
+            <div className="p-4 rounded-xl bg-slate-900 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center">
+                  <Activity className="w-5 h-5" />
                 </div>
-              ))}
+                <div>
+                  <span className="text-xs font-bold">Automation Dispatcher</span>
+                  <p className="text-[11px] text-slate-400">Node: BLR-RPA-PROD-SRV · Process: PayFlow.Automation.Main</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleRunDiagnostic}
+                disabled={isRunningTest}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-900 bg-teal-400 hover:bg-teal-300 disabled:opacity-50 rounded-lg transition-colors whitespace-nowrap shadow-xs"
+              >
+                {isRunningTest ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Executing Activities...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Run Automation Pipeline Test</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            {/* CLI Commands for Local Execution */}
-            <div className="mt-8 pt-6 border-t border-slate-200">
-              <h4 className="text-xs font-bold text-slate-900 mb-2">How to Run via Windows Command Line / UiPath Robot CLI</h4>
+            {testResult && (
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-900">
+                  <span>Diagnostic Execution Completed</span>
+                  <span className="font-mono text-teal-700">Duration: {testResult.durationSeconds}s · Job: {testResult.jobId}</span>
+                </div>
+                <div className="space-y-1.5 font-mono text-[11px]">
+                  {testResult.activitiesLog.map((log: any) => (
+                    <div key={log.activityId} className="p-2 bg-white rounded border border-slate-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                        <span className="font-semibold text-slate-800">{log.activityName}</span>
+                      </div>
+                      <span className="text-slate-400">{log.durationMs}ms</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CLI Commands */}
+            <div className="pt-4 border-t border-slate-100">
+              <h4 className="text-xs font-bold text-slate-900 mb-2">Local Windows Command Line / UiPath Assistant Execution</h4>
+              <p className="text-xs text-slate-500 mb-2">Run from PowerShell or Windows Terminal on the host robot machine:</p>
               <div className="p-3 bg-slate-900 text-teal-300 font-mono text-xs rounded-lg flex items-center justify-between">
                 <code>
                   "C:\Users\%USERNAME%\AppData\Local\Programs\UiPath\Studio\UiRobot.exe" execute --file "PayFlow_Automation\Main.xaml"
