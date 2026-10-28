@@ -12,6 +12,7 @@ import { api } from './services/api';
 import { Employee, PayrollRun, SystemSettings, ActiveTab } from './types/payroll';
 import { INITIAL_SETTINGS } from './data/initialData';
 import { generateAttendanceTemplate, downloadFile } from './services/excelService';
+import { AlertTriangle } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
@@ -21,6 +22,7 @@ export default function App() {
   const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
   const [settings, setSettings] = useState<SystemSettings>(INITIAL_SETTINGS);
   const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Show temporary toast
@@ -30,23 +32,27 @@ export default function App() {
   };
 
   // Initial load
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [empData, runsData, settingsData] = await Promise.all([
-          api.getEmployees(),
-          api.getPayrollRuns(),
-          api.getSettings(),
-        ]);
-        setEmployees(empData);
-        setPayrollRuns(runsData);
-        setSettings(settingsData);
-      } catch (err) {
-        console.error('Initialization error:', err);
-      } finally {
-        setLoading(false);
-      }
+  const loadData = async () => {
+    setLoading(true);
+    setInitError(null);
+    try {
+      const [empData, runsData, settingsData] = await Promise.all([
+        api.getEmployees(),
+        api.getPayrollRuns(),
+        api.getSettings(),
+      ]);
+      setEmployees(empData);
+      setPayrollRuns(runsData);
+      setSettings(settingsData);
+    } catch (err: any) {
+      console.error('Initialization error:', err);
+      setInitError(err.message || 'Failed to connect to PayFlow backend');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -196,6 +202,24 @@ export default function App() {
 
         {/* Dynamic Page Views */}
         <main className="flex-1 p-6 overflow-y-auto">
+          {initError && (
+            <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3 min-w-0">
+                <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-rose-900">Backend Connection Notice</h4>
+                  <p className="text-xs text-rose-700 mt-0.5 truncate">{initError}</p>
+                </div>
+              </div>
+              <button
+                onClick={loadData}
+                className="px-3 py-1.5 text-xs font-semibold text-rose-800 bg-white border border-rose-300 hover:bg-rose-100 rounded-lg transition-colors shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           {activeTab === 'overview' && (
             <OverviewDashboard
               employees={employees}

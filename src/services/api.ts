@@ -1,156 +1,154 @@
 import { Employee, PayrollRun, SystemSettings, UiPathExecutionDetails } from '../types/payroll';
-import { INITIAL_EMPLOYEES, INITIAL_PAYROLL_RUNS, INITIAL_SETTINGS } from '../data/initialData';
+import { INITIAL_SETTINGS } from '../data/initialData';
 
 const BASE_URL = '';
 
-export const api = {
-  // Employees
-  async getEmployees(): Promise<Employee[]> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/employees`);
-      if (!res.ok) throw new Error('Failed to fetch employees');
-      return await res.json();
-    } catch (err) {
-      console.warn('API fetch failed, falling back to local storage', err);
-      const local = localStorage.getItem('payflow_employees');
-      return local ? JSON.parse(local) : INITIAL_EMPLOYEES;
+/**
+ * Robust HTTP response handler that guarantees meaningful error messages
+ * instead of cryptic "Unexpected token <, <!doctype... is not valid JSON" errors.
+ */
+async function handleResponse<T>(res: Response, defaultError: string): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+
+  if (!res.ok) {
+    let errorDetail = defaultError;
+
+    if (contentType.includes('application/json')) {
+      try {
+        const json = await res.json();
+        errorDetail = json.error || json.message || defaultError;
+      } catch {
+        errorDetail = `HTTP ${res.status}: ${res.statusText || defaultError}`;
+      }
+    } else {
+      try {
+        const text = await res.text();
+        const trimmed = text.trim();
+        if (trimmed.startsWith('<') || trimmed.startsWith('<!doctype') || trimmed.toLowerCase().includes('<html')) {
+          errorDetail = `HTTP ${res.status} (${res.statusText || 'Not Found'}): The server returned an HTML error page instead of JSON. Ensure the backend API routes are active.`;
+        } else if (trimmed.length > 0 && trimmed.length < 200) {
+          errorDetail = trimmed;
+        } else {
+          errorDetail = `HTTP ${res.status}: ${res.statusText || defaultError}`;
+        }
+      } catch {
+        errorDetail = `HTTP ${res.status}: ${res.statusText || defaultError}`;
+      }
     }
+
+    throw new Error(errorDetail);
+  }
+
+  if (contentType.includes('application/json')) {
+    try {
+      return await res.json();
+    } catch {
+      throw new Error('Malformed JSON received from server.');
+    }
+  }
+
+  // Fallback in case Content-Type is missing but body is valid JSON
+  try {
+    const raw = await res.text();
+    return JSON.parse(raw);
+  } catch {
+    throw new Error(`Expected JSON response from server, but received non-JSON payload (${res.status}).`);
+  }
+}
+
+export const api = {
+  // Server Health & Diagnostics
+  async getHealth(): Promise<{ status: string; storage: string; mongoConfigured: boolean; mongoConnected: boolean }> {
+    try {
+      const res = await fetch(`${BASE_URL}/api/health`);
+      return await handleResponse(res, 'Health check failed');
+    } catch (err: any) {
+      throw new Error(`Cannot connect to PayFlow backend: ${err.message}`);
+    }
+  },
+
+  // Employees CRUD
+  async getEmployees(): Promise<Employee[]> {
+    const res = await fetch(`${BASE_URL}/api/employees`);
+    return await handleResponse<Employee[]>(res, 'Failed to fetch employees from server');
   },
 
   async createEmployee(employee: Partial<Employee>): Promise<Employee> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/employees`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(employee),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to create employee');
-      }
-      return await res.json();
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/employees`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(employee),
+    });
+    return await handleResponse<Employee>(res, 'Failed to create employee');
   },
 
   async bulkImportEmployees(list: Partial<Employee>[]): Promise<Employee[]> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/employees/bulk`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(list),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to bulk import employees');
-      }
-      const data = await res.json();
-      return data.employees;
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/employees/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(list),
+    });
+    const data = await handleResponse<{ success: boolean; employees: Employee[] }>(res, 'Failed to bulk import employees');
+    return data.employees;
   },
 
   async updateEmployee(id: string, updates: Partial<Employee>): Promise<Employee> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/employees/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to update employee');
-      }
-      return await res.json();
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/employees/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    return await handleResponse<Employee>(res, 'Failed to update employee');
   },
 
   async deleteEmployee(id: string): Promise<void> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/employees/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to delete employee');
-      }
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/employees/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    await handleResponse<{ success: boolean }>(res, 'Failed to delete employee');
   },
 
-  // Payroll Runs
+  // Payroll Runs CRUD
   async getPayrollRuns(): Promise<PayrollRun[]> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/payroll/runs`);
-      if (!res.ok) throw new Error('Failed to fetch payroll runs');
-      return await res.json();
-    } catch (err) {
-      console.warn('API fetch failed for payroll runs', err);
-      const local = localStorage.getItem('payflow_runs');
-      return local ? JSON.parse(local) : INITIAL_PAYROLL_RUNS;
-    }
+    const res = await fetch(`${BASE_URL}/api/payroll/runs`);
+    return await handleResponse<PayrollRun[]>(res, 'Failed to fetch payroll runs from server');
   },
 
   async savePayrollRun(run: PayrollRun): Promise<PayrollRun> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/payroll/runs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(run),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to save payroll run');
-      }
-      return await res.json();
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/payroll/runs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(run),
+    });
+    return await handleResponse<PayrollRun>(res, 'Failed to save payroll run');
   },
 
   async deletePayrollRun(id: string): Promise<void> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/payroll/runs/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to delete payroll run');
-      }
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/payroll/runs/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    await handleResponse<{ success: boolean }>(res, 'Failed to delete payroll run');
   },
 
   // Settings
   async getSettings(): Promise<SystemSettings> {
     try {
       const res = await fetch(`${BASE_URL}/api/settings`);
-      if (!res.ok) throw new Error('Failed to fetch settings');
-      return await res.json();
+      return await handleResponse<SystemSettings>(res, 'Failed to fetch settings');
     } catch (err) {
+      console.warn('Could not load settings from server, using default:', err);
       return INITIAL_SETTINGS;
     }
   },
 
   async updateSettings(settings: Partial<SystemSettings>): Promise<SystemSettings> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
-      if (!res.ok) throw new Error('Failed to update settings');
-      const data = await res.json();
-      return data.settings;
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    });
+    const data = await handleResponse<{ success: boolean; settings: SystemSettings }>(res, 'Failed to update settings');
+    return data.settings;
   },
 
   // RPA Trigger
@@ -161,44 +159,30 @@ export const api = {
     recordsCount: number;
     workingDays: number;
   }): Promise<UiPathExecutionDetails> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/rpa/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error('UiPath RPA execution failed');
-      const data = await res.json();
-      return data.details;
-    } catch (err: any) {
-      throw err;
-    }
+    const res = await fetch(`${BASE_URL}/api/rpa/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await handleResponse<{ success: boolean; details: UiPathExecutionDetails }>(res, 'UiPath RPA execution failed');
+    return data.details;
   },
 
   // Reset clean state
   async resetDemoData(): Promise<void> {
-    try {
-      await fetch(`${BASE_URL}/api/reset-demo`, { method: 'POST' });
-    } catch (err) {
-      console.warn('Reset demo error', err);
-    }
+    const res = await fetch(`${BASE_URL}/api/reset-demo`, { method: 'POST' });
+    await handleResponse<{ success: boolean }>(res, 'Reset demo failed');
   },
 
   // Clear all employees & runs
   async clearAllData(): Promise<void> {
-    try {
-      await fetch(`${BASE_URL}/api/clear-all`, { method: 'POST' });
-    } catch (err) {
-      console.warn('Clear all error', err);
-    }
+    const res = await fetch(`${BASE_URL}/api/clear-all`, { method: 'POST' });
+    await handleResponse<{ success: boolean }>(res, 'Clear all data failed');
   },
 
-  // Optional: load sample dataset
+  // Load sample dataset
   async loadSampleData(): Promise<void> {
-    try {
-      await fetch(`${BASE_URL}/api/load-sample`, { method: 'POST' });
-    } catch (err) {
-      console.warn('Load sample error', err);
-    }
+    const res = await fetch(`${BASE_URL}/api/load-sample`, { method: 'POST' });
+    await handleResponse<{ success: boolean }>(res, 'Load sample data failed');
   },
 };
